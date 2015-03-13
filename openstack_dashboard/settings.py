@@ -41,7 +41,7 @@ TEMPLATE_DEBUG = DEBUG
 
 SITE_BRANDING = 'OpenStack Dashboard'
 
-LOGIN_URL = '/auth/login/'
+LOGIN_URL = '/auth/kerberos/'
 LOGOUT_URL = '/auth/logout/'
 # LOGIN_REDIRECT_URL can be used as an alternative for
 # HORIZON_CONFIG.user_home, if user_home is not set.
@@ -163,14 +163,28 @@ INSTALLED_APPS = [
 ]
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-AUTHENTICATION_BACKENDS = ('openstack_auth.backend.KeystoneBackend',)
+AUTHENTICATION_BACKENDS = ('openstack_auth.backend.KeystoneBackend',
+                           'openstack_auth_kerberos.backend.KerberosLogin')
+AUTHENTICATION_URLS = ('openstack_auth.urls', )
+#                      'openstack_auth_kerberos.urls')
 MESSAGE_STORAGE = 'django.contrib.messages.storage.fallback.FallbackStorage'
 
-SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 SESSION_COOKIE_HTTPONLY = True
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_COOKIE_SECURE = False
 SESSION_TIMEOUT = 1800
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'horizon',
+        'USER': 'horizon',
+        'PASSWORD': 'horizon',
+        'HOST': 'localhost',
+    }
+}
+
 # A token can be near the end of validity when a page starts loading, and
 # invalid during the rendering which can cause errors when a page load.
 # TOKEN_TIMEOUT_MARGIN defines a time in seconds we retrieve from token
@@ -211,6 +225,7 @@ USE_L10N = True
 USE_TZ = True
 
 OPENSTACK_KEYSTONE_DEFAULT_ROLE = '_member_'
+OPENSTACK_KEYSTONE_DEFAULT_DOMAIN = 'JAMIELENNOX-FREEIPA.ORG'
 
 DEFAULT_EXCEPTION_REPORTER_FILTER = 'horizon.exceptions.HorizonReporterFilter'
 
